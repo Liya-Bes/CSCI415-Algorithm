@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <cstddef>
+#include <fstream>
 
 using namespace std;
 
@@ -55,65 +56,78 @@ public:
         }
     }
 
-    void moveToFront(int data)
+    int moveToFront(int data)
     {
         node *before = NULL;
         node *current = head;
-
+        int comparisons =0;
         while(current != NULL)
         {
+            comparisons++;
             if(current->info == data)
             {
                 if(current==head)
                 {
-                    return;
+                    return comparisons;
+                }
+                if(current == tail)
+                {
+                    tail = before;
                 }
                 before->next = current->next;
                 current->next = head;
                 head = current;
-                return;
+                return comparisons;
             }
 
             /*if(current->info == data && current==head)
             {
                 return;
             }*/
-
+            
             before = current;
             current = current-> next;
         }
         insert(data);
+        return comparisons;
     }
 
-    void transpose(int data)
+    int transpose(int data)
     {
         node *before = NULL;
         node *current = head;
         node *beforeBefore = NULL;
+        int comparisons =0;
 
         while(current != NULL && current->info != data)
         {
+            comparisons++;
             beforeBefore = before;
             before = current;
             current = current-> next;
+            
         }
             //node *beforeBefore = head;
             if(current == NULL)
             {
                 insert(data);
-                return;
+                return comparisons;
             }
 
             if(current == head)
             {
-                return;
+                return comparisons;
             }
 
            /*while(beforeBefore->next != current)
             {
                 beforeBefore = beforeBefore->next;
             }*/ 
-            
+            if(current == tail)
+            {
+                tail = before;
+            }
+
             if(beforeBefore== NULL)
             {
                 head = current;
@@ -125,7 +139,37 @@ public:
 
         before->next = current->next;
         current->next = before;
+        return comparisons;
+    }
 
+    void runFile(string filename)
+    {
+        ifstream file(filename);
+
+        list moveToFrontList;
+        list transposeList;
+        long long moveToFront=0;
+        long long transpose =0;
+        int data;
+
+        while(file >> data)
+        {
+            moveToFront += moveToFrontList.moveToFront(data);
+
+        }
+
+        file.close();
+        file.open(filename);
+
+        while(file >> data)
+        {
+            transpose += transposeList.transpose(data);
+        }
+
+        cout << endl;
+        cout << filename << endl;
+        cout << "Move to front: " << moveToFront << endl;
+        cout << "Transpose: " << transpose << endl;
     }
 
     void reverse()
@@ -215,47 +259,16 @@ bool Test(list l1, list l2)
     return false;
 }
 
+
+
 int main()
 {
-
-    srand(time(NULL));
-
-    Setup();
-
-    bool result = Test(list1, list2);
-
-    cout << "List1:" << list1 << endl;
-    cout << "List2:" << list2 << endl;
-    if (result)
-        cout << "They are the same\n";
-    else
-        cout << "They are not the same\n";
-
-    result = Test(list3, list4);
-    cout << "List3:" << list3 << endl;
-    cout << "List4:" << list4 << endl;
-    if (result)
-        cout << "They are the same\n";
-    else
-        cout << "They are not the same\n";
-
-    cout << "List3:" << list3 << endl;
-    list3.reverse();
-    cout << "List3 Reversed:" << list3 << endl;
-
     list test;
-    test.insert(10);
-    test.insert(20);
-    test.insert(30);
-    test.insert(40);
-    test.insert(50);
-    cout << "Before Move to front :" << test << endl;
-    test.moveToFront(30);
-    cout << "After Move to front:" << test << endl;
-
-    cout << "Before Transpose :" << test << endl;
-    test.transpose(30);
-    cout << "After Transpose:" << test << endl;
-
+    test.runFile("data1_trace.txt");
+    test.runFile("data2_zipf.txt");
+    test.runFile("data3_shift.txt");
+    test.runFile("data4_uniform.txt");
+    test.runFile("data5_burst.txt");
+    
     return 0;
 }
